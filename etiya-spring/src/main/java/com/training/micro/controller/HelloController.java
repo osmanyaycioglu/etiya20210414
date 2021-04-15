@@ -1,7 +1,14 @@
 package com.training.micro.controller;
 
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.audit.AuditEvent;
+import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +29,9 @@ import com.training.micro.models.Person;
 })
 public class HelloController {
 
+    @Autowired
+    private AuditEventRepository aer;
+
     @GetMapping("/h1")
     public String hello1() {
         return "Hello GET";
@@ -36,7 +46,20 @@ public class HelloController {
     @GetMapping("/h2/{xyz}/{abc}/{dfg}")
     public String hello2(@PathVariable(name = "xyz") final String name,
                          @PathVariable("abc") final String surname,
-                         @PathVariable(name = "dfg") final int age) {
+                         @PathVariable(name = "dfg") final int age,
+                         final Principal principalParam) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("method",
+                 "hello2");
+        data.put("endpoint",
+                 "/h2/{xyz}/{abc}/{dfg}");
+
+        data.put("xyz",
+                 "abc");
+
+        this.aer.add(new AuditEvent(principalParam.getName(),
+                                    "method",
+                                    data));
         return "Hello 2 " + name + " " + surname + " " + age;
     }
 

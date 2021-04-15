@@ -45,9 +45,9 @@ public class RestSecurityConf extends WebSecurityConfigurerAdapter {
     public void configure(final HttpSecurity http) throws Exception {
         http.authorizeRequests()
             .antMatchers("/actuator/**",
-                         "/xyz/**")
-            .hasAnyRole("SUPER_ADMIN",
-                        "ADMIN")
+                         "/xyz/**",
+                         "/login")
+            .permitAll()
             .antMatchers("/api/v1/person/query")
             .hasAnyRole("VIEWER")
             .antMatchers("/api/v1/person/management")
@@ -57,6 +57,10 @@ public class RestSecurityConf extends WebSecurityConfigurerAdapter {
             .hasAnyRole("USER")
             .antMatchers("/ters/**")
             .hasAnyRole("MODERATOR")
+            .antMatchers("/api/v1/hello/h7/{userName}/**")
+            .access("@mySecurityChecker.check(authentication,request,#userName)")
+            .antMatchers("/api/v1/hello/**")
+            .access("@mySecurityChecker.check(authentication,request,'ROLE_ADMIN')")
             .anyRequest()
             .authenticated()
             .and()
